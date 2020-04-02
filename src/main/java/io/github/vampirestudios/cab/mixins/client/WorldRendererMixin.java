@@ -1,4 +1,4 @@
-package io.github.vampirestudios.cab.mixins;
+package io.github.vampirestudios.cab.mixins.client;
 
 import io.github.vampirestudios.cab.rendering.AstralRendering;
 import net.minecraft.client.MinecraftClient;
