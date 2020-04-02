@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "Custom Astral Body",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Allows for custom sun and moon tint and size. Will allow for more in the future",
   "authors": [
     "Me!"
   ],
