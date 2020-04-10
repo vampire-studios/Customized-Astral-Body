@@ -45,10 +45,11 @@ public abstract class WorldRendererMixin {
             if (this.client.world.dimension.getType() == DimensionType.THE_END || ((AstralBodyModifier) this.world.dimension).isEndSky()) {
                 this.renderEndSky(matrixStack);
             }
-            if (this.world.dimension.hasVisibleSky() || !((AstralBodyModifier) this.world.dimension).isEndSky()) {
+            if (this.world.dimension.hasVisibleSky() || !((AstralBodyModifier) this.world.dimension).isEndSky() ||
+                    this.client.world.dimension.getType() != DimensionType.THE_END) {
                 if (((AstralBodyModifier) this.world.dimension).hasCustomAstralBody()) {
                     AstralRendering.renderCustomAstralBody(matrixStack, client, this.world.dimension, world, lightSkyBuffer, darkSkyBuffer,
-                            starsBuffer, skyVertexFormat, f, textureManager, MOON_PHASES, SUN);
+                            starsBuffer, skyVertexFormat, f, textureManager);
                 } else {
                     RenderSystem.disableTexture();
                     Vec3d vec3d = this.world.method_23777(this.client.gameRenderer.getCamera().getBlockPos(), f);
@@ -125,8 +126,8 @@ public abstract class WorldRendererMixin {
                     int u = this.world.getMoonPhase();
                     int v = u % 4;
                     int w = u / 4 % 2;
-                    float x = (float)(v + 0) / 4.0F;
-                    p = (float)(w + 0) / 2.0F;
+                    float x = (float) v / 4.0F;
+                    p = (float) w / 2.0F;
                     q = (float)(v + 1) / 4.0F;
                     r = (float)(w + 1) / 2.0F;
                     bufferBuilder.begin(7, VertexFormats.POSITION_TEXTURE);

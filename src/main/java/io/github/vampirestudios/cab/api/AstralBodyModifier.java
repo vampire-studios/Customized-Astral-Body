@@ -6,6 +6,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.util.Identifier;
 
 public interface AstralBodyModifier {
 
@@ -37,6 +38,16 @@ public interface AstralBodyModifier {
     @Environment(EnvType.CLIENT)
     default Vector3f getMoonTint() {
         return new Vector3f(1.0F, 1.0F, 1.0F);
+    }
+
+    @Environment(EnvType.CLIENT)
+    default Identifier getSunTexture() {
+        return new Identifier("texture/environment/sun");
+    }
+
+    @Environment(EnvType.CLIENT)
+    default Identifier getMoonTexture() {
+        return new Identifier("texture/environment/moon_phases");
     }
 
     default boolean hasCustomSky() {

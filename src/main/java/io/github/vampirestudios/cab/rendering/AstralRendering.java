@@ -10,7 +10,6 @@ import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
@@ -19,8 +18,7 @@ import net.minecraft.world.dimension.Dimension;
 public class AstralRendering {
 
     public static void renderCustomAstralBody(MatrixStack matrixStack, MinecraftClient client, Dimension dimension, ClientWorld world, VertexBuffer lightSkyBuffer,
-                                              VertexBuffer darkSkyBuffer, VertexBuffer starsBuffer, VertexFormat skyVertexFormat, float f, TextureManager textureManager,
-                                              Identifier MOON_PHASES, Identifier SUN) {
+                                              VertexBuffer darkSkyBuffer, VertexBuffer starsBuffer, VertexFormat skyVertexFormat, float f, TextureManager textureManager) {
 
         RenderSystem.disableTexture();
         Vec3d vec3d = world.method_23777(client.gameRenderer.getCamera().getBlockPos(), f);
@@ -85,7 +83,7 @@ public class AstralRendering {
         Matrix4f matrix4f2 = matrixStack.peek().getModel();
         t = ((AstralBodyModifier)dimension).getSunSize();
         Vector3f sunTint = ((AstralBodyModifier)dimension).getSunTint();
-        textureManager.bindTexture(SUN);
+        textureManager.bindTexture(((AstralBodyModifier)dimension).getSunTexture());
         bufferBuilder.begin(7, VertexFormats.POSITION_COLOR_TEXTURE);
         bufferBuilder.vertex(matrix4f2, -t, 100.0F, -t).color(sunTint.getX(), sunTint.getY(), sunTint.getZ(), 1.0F).texture(0.0F, 0.0F).next();
         bufferBuilder.vertex(matrix4f2, t, 100.0F, -t).color(sunTint.getX(), sunTint.getY(), sunTint.getZ(), 1.0F).texture(1.0F, 0.0F).next();
@@ -95,7 +93,7 @@ public class AstralRendering {
         BufferRenderer.draw(bufferBuilder);
         t = ((AstralBodyModifier)dimension).getMoonSize();
         Vector3f vector3f2 = ((AstralBodyModifier)dimension).getMoonTint();
-        textureManager.bindTexture(MOON_PHASES);
+        textureManager.bindTexture(((AstralBodyModifier)dimension).getMoonTexture());
         int u = world.getMoonPhase();
         o = u % 4;
         int w = u / 4 % 2;
