@@ -42,12 +42,12 @@ public interface AstralBodyModifier {
 
     @Environment(EnvType.CLIENT)
     default Identifier getSunTexture() {
-        return new Identifier("texture/environment/sun");
+        return new Identifier("texture/environment/sun.png");
     }
 
     @Environment(EnvType.CLIENT)
     default Identifier getMoonTexture() {
-        return new Identifier("texture/environment/moon_phases");
+        return new Identifier("texture/environment/moon_phases.png");
     }
 
     default boolean hasCustomSky() {

@@ -19,7 +19,6 @@ public class AstralRendering {
 
     public static void renderCustomAstralBody(MatrixStack matrixStack, MinecraftClient client, Dimension dimension, ClientWorld world, VertexBuffer lightSkyBuffer,
                                               VertexBuffer darkSkyBuffer, VertexBuffer starsBuffer, VertexFormat skyVertexFormat, float f, TextureManager textureManager) {
-
         RenderSystem.disableTexture();
         Vec3d vec3d = world.method_23777(client.gameRenderer.getCamera().getBlockPos(), f);
         float g = (float)vec3d.x;
