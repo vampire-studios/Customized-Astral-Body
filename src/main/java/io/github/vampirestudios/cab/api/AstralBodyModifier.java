@@ -54,6 +54,10 @@ public interface AstralBodyModifier {
         return false;
     }
 
+    default boolean hasFullyCustomSky() {
+        return false;
+    }
+
     default void render(MatrixStack matrixStack, float f, MinecraftClient client, ClientWorld world) {
 
     }

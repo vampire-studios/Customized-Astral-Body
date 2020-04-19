@@ -18,8 +18,10 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
@@ -37,11 +39,11 @@ public abstract class WorldRendererMixin {
     @Shadow protected abstract void renderEndSky(MatrixStack matrixStack);
 
     /**
-     * @author Olivia
+     * @author OliviaTheVampire
      */
-    @Overwrite
-    public void renderSky(MatrixStack matrixStack, float f) {
-        if (!((AstralBodyModifier) this.world.dimension).hasCustomSky()) {
+    @Inject(method = "renderSky", at=@At("RETURN"))
+    public void renderSky(MatrixStack matrixStack, float f, CallbackInfo info) {
+        if (((AstralBodyModifier) this.world.dimension).hasCustomSky()) {
             if (this.client.world.dimension.getType() == DimensionType.THE_END || ((AstralBodyModifier) this.world.dimension).isEndSky()) {
                 this.renderEndSky(matrixStack);
             }
@@ -178,8 +180,9 @@ public abstract class WorldRendererMixin {
                     RenderSystem.disableFog();
                 }
             }
-        } else {
-            ((AstralBodyModifier) this.world.dimension).render(matrixStack, f, client, world);
+            if (((AstralBodyModifier) this.world.dimension).hasFullyCustomSky()) {
+                ((AstralBodyModifier) this.world.dimension).render(matrixStack, f, client, world);
+            }
         }
     }
 
