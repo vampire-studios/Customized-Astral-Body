@@ -38,7 +38,7 @@ public class AstralRendering {
         RenderSystem.disableAlphaTest();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        float[] fs = dimension.getBackgroundColor(world.getSkyAngle(f), f);
+        float[] fs = world.method_28103().method_28109(world.getSkyAngle(f), f);
         float s;
         float t;
         int o;

@@ -72,7 +72,7 @@ public abstract class WorldRendererMixin {
                     RenderSystem.disableAlphaTest();
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
-                    float[] fs = this.world.getDimension().getBackgroundColor(this.world.getSkyAngle(f), f);
+                    float[] fs = this.world.method_28103().method_28109(this.world.getSkyAngle(f), f);
                     float s;
                     float t;
                     float p;
