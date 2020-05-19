@@ -125,7 +125,7 @@ public class AstralRendering {
         matrixStack.pop();
         RenderSystem.disableTexture();
         RenderSystem.color3f(0.0F, 0.0F, 0.0F);
-        double d = client.player.getCameraPosVec(f).y - world.getSkyDarknessHeight();
+        double d = client.player.getCameraPosVec(f).y - world.getLevelProperties().method_28105();
         if (d < 0.0D) {
             matrixStack.push();
             matrixStack.translate(0.0D, 12.0D, 0.0D);
@@ -137,7 +137,7 @@ public class AstralRendering {
             matrixStack.pop();
         }
 
-        if (dimension.hasGround()) {
+        if (world.method_28103().method_28113()) {
             RenderSystem.color3f(g * 0.2F + 0.04F, h * 0.2F + 0.04F, i * 0.6F + 0.1F);
         } else {
             RenderSystem.color3f(g, h, i);

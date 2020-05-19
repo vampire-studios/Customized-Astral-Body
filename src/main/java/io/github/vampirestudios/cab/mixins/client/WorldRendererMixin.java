@@ -157,7 +157,7 @@ public abstract class WorldRendererMixin {
                     matrixStack.pop();
                     RenderSystem.disableTexture();
                     RenderSystem.color3f(0.0F, 0.0F, 0.0F);
-                    double d = this.client.player.getCameraPosVec(f).y - this.world.getSkyDarknessHeight();
+                    double d = this.client.player.getCameraPosVec(f).y - this.world.getLevelProperties().method_28105();
                     if (d < 0.0D) {
                         matrixStack.push();
                         matrixStack.translate(0.0D, 12.0D, 0.0D);
@@ -169,7 +169,7 @@ public abstract class WorldRendererMixin {
                         matrixStack.pop();
                     }
 
-                    if (this.world.getDimension().hasGround()) {
+                    if (this.world.method_28103().method_28113()) {
                         RenderSystem.color3f(g * 0.2F + 0.04F, h * 0.2F + 0.04F, i * 0.6F + 0.1F);
                     } else {
                         RenderSystem.color3f(g, h, i);
