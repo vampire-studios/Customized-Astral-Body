@@ -4,7 +4,7 @@
   "package": "io.github.vampirestudios.cab.mixins",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "DimensionMixin"
+    "SkyPropertiesMixin"
   ],
   "client": [
     "client.WorldRendererMixin"

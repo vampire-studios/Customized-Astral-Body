@@ -13,11 +13,10 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.dimension.Dimension;
 
 public class AstralRendering {
 
-    public static void renderCustomAstralBody(MatrixStack matrixStack, MinecraftClient client, Dimension dimension, ClientWorld world, VertexBuffer lightSkyBuffer,
+    public static void renderCustomAstralBody(MatrixStack matrixStack, MinecraftClient client, SkyProperties dimension, ClientWorld world, VertexBuffer lightSkyBuffer,
                                               VertexBuffer darkSkyBuffer, VertexBuffer starsBuffer, VertexFormat skyVertexFormat, float f, TextureManager textureManager) {
         RenderSystem.disableTexture();
         Vec3d vec3d = world.method_23777(client.gameRenderer.getCamera().getBlockPos(), f);
@@ -38,7 +37,7 @@ public class AstralRendering {
         RenderSystem.disableAlphaTest();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        float[] fs = world.method_28103().method_28109(world.getSkyAngle(f), f);
+        float[] fs = world.getSkyProperties().getSkyColor(world.getSkyAngleRadians(f), f);
         float s;
         float t;
         int o;
@@ -78,7 +77,7 @@ public class AstralRendering {
         s = 1.0F - world.getRainGradient(f);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, s);
         matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(-90.0F));
-        matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(world.getSkyAngle(f) * 360.0F));
+        matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(world.getSkyAngleRadians(f) * 360.0F));
         Matrix4f matrix4f2 = matrixStack.peek().getModel();
         t = ((AstralBodyModifier)dimension).getSunSize();
         Vector3f sunTint = ((AstralBodyModifier)dimension).getSunTint();
@@ -93,7 +92,7 @@ public class AstralRendering {
         t = ((AstralBodyModifier)dimension).getMoonSize();
         Vector3f vector3f2 = ((AstralBodyModifier)dimension).getMoonTint();
         textureManager.bindTexture(((AstralBodyModifier)dimension).getMoonTexture());
-        int u = world.getMoonPhase();
+        int u = world.method_30273();
         o = u % 4;
         int w = u / 4 % 2;
         q = (float) o / 4.0F;
@@ -125,7 +124,7 @@ public class AstralRendering {
         matrixStack.pop();
         RenderSystem.disableTexture();
         RenderSystem.color3f(0.0F, 0.0F, 0.0F);
-        double d = client.player.getCameraPosVec(f).y - world.getLevelProperties().method_28105();
+        double d = client.player.getCameraPosVec(f).y - world.getLevelProperties().getSkyDarknessHeight();
         if (d < 0.0D) {
             matrixStack.push();
             matrixStack.translate(0.0D, 12.0D, 0.0D);
@@ -137,7 +136,7 @@ public class AstralRendering {
             matrixStack.pop();
         }
 
-        if (world.method_28103().method_28113()) {
+        if (world.getSkyProperties().isAlternateSkyColor()) {
             RenderSystem.color3f(g * 0.2F + 0.04F, h * 0.2F + 0.04F, i * 0.6F + 0.1F);
         } else {
             RenderSystem.color3f(g, h, i);

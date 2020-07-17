@@ -15,7 +15,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,14 +42,14 @@ public abstract class WorldRendererMixin {
      */
     @Inject(method = "renderSky", at=@At("RETURN"))
     public void renderSky(MatrixStack matrixStack, float f, CallbackInfo info) {
-        if (((AstralBodyModifier) this.world.getDimension()).hasCustomSky()) {
-            if (this.client.world.getDimension().getType() == DimensionType.THE_END || ((AstralBodyModifier) this.world.getDimension()).isEndSky()) {
+        if (((AstralBodyModifier) this.world.getSkyProperties()).hasCustomSky()) {
+            if (this.client.world.getSkyProperties().getSkyType() == SkyProperties.SkyType.END || ((AstralBodyModifier) this.world.getSkyProperties()).isEndSky()) {
                 this.renderEndSky(matrixStack);
             }
-            if (this.world.getDimension().hasVisibleSky() || !((AstralBodyModifier) this.world.getDimension()).isEndSky() ||
-                    this.client.world.getDimension().getType() != DimensionType.THE_END) {
-                if (((AstralBodyModifier) this.world.getDimension()).hasCustomAstralBody()) {
-                    AstralRendering.renderCustomAstralBody(matrixStack, client, this.world.getDimension(), world, lightSkyBuffer, darkSkyBuffer,
+            if (this.client.world.getSkyProperties().getSkyType() == SkyProperties.SkyType.NORMAL || !((AstralBodyModifier) this.world.getSkyProperties()).isEndSky() ||
+                    this.client.world.getSkyProperties().getSkyType() != SkyProperties.SkyType.END) {
+                if (((AstralBodyModifier) this.world.getSkyProperties()).hasCustomAstralBody()) {
+                    AstralRendering.renderCustomAstralBody(matrixStack, client, this.world.getSkyProperties(), world, lightSkyBuffer, darkSkyBuffer,
                             starsBuffer, skyVertexFormat, f, textureManager);
                 } else {
                     RenderSystem.disableTexture();
@@ -72,7 +71,7 @@ public abstract class WorldRendererMixin {
                     RenderSystem.disableAlphaTest();
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
-                    float[] fs = this.world.method_28103().method_28109(this.world.getSkyAngle(f), f);
+                    float[] fs = this.world.getSkyProperties().getSkyColor(this.world.getSkyAngleRadians(f), f);
                     float s;
                     float t;
                     float p;
@@ -112,7 +111,7 @@ public abstract class WorldRendererMixin {
                     s = 1.0F - this.world.getRainGradient(f);
                     RenderSystem.color4f(1.0F, 1.0F, 1.0F, s);
                     matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(-90.0F));
-                    matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(this.world.getSkyAngle(f) * 360.0F));
+                    matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(this.world.getSkyAngleRadians(f) * 360.0F));
                     Matrix4f matrix4f2 = matrixStack.peek().getModel();
                     t = 30.0F;
                     this.textureManager.bindTexture(SUN);
@@ -125,7 +124,7 @@ public abstract class WorldRendererMixin {
                     BufferRenderer.draw(bufferBuilder);
                     t = 20.0F;
                     this.textureManager.bindTexture(MOON_PHASES);
-                    int u = this.world.getMoonPhase();
+                    int u = this.world.method_30273();
                     int v = u % 4;
                     int w = u / 4 % 2;
                     float x = (float) v / 4.0F;
@@ -157,7 +156,7 @@ public abstract class WorldRendererMixin {
                     matrixStack.pop();
                     RenderSystem.disableTexture();
                     RenderSystem.color3f(0.0F, 0.0F, 0.0F);
-                    double d = this.client.player.getCameraPosVec(f).y - this.world.getLevelProperties().method_28105();
+                    double d = this.client.player.getCameraPosVec(f).y - this.world.getLevelProperties().getSkyDarknessHeight();
                     if (d < 0.0D) {
                         matrixStack.push();
                         matrixStack.translate(0.0D, 12.0D, 0.0D);
@@ -169,7 +168,7 @@ public abstract class WorldRendererMixin {
                         matrixStack.pop();
                     }
 
-                    if (this.world.method_28103().method_28113()) {
+                    if (this.world.getSkyProperties().isAlternateSkyColor()) {
                         RenderSystem.color3f(g * 0.2F + 0.04F, h * 0.2F + 0.04F, i * 0.6F + 0.1F);
                     } else {
                         RenderSystem.color3f(g, h, i);
@@ -180,8 +179,8 @@ public abstract class WorldRendererMixin {
                     RenderSystem.disableFog();
                 }
             }
-            if (((AstralBodyModifier) this.world.getDimension()).hasFullyCustomSky()) {
-                ((AstralBodyModifier) this.world.getDimension()).render(matrixStack, f, client, world);
+            if (((AstralBodyModifier) this.world.getSkyProperties()).hasFullyCustomSky()) {
+                ((AstralBodyModifier) this.world.getSkyProperties()).render(matrixStack, f, client, world);
             }
         }
     }
