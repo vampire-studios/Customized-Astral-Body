@@ -92,7 +92,7 @@ public class AstralRendering {
         t = ((AstralBodyModifier)dimension).getMoonSize();
         Vector3f vector3f2 = ((AstralBodyModifier)dimension).getMoonTint();
         textureManager.bindTexture(((AstralBodyModifier)dimension).getMoonTexture());
-        int u = world.method_30273();
+        int u = world.getMoonPhase();
         o = u % 4;
         int w = u / 4 % 2;
         q = (float) o / 4.0F;
