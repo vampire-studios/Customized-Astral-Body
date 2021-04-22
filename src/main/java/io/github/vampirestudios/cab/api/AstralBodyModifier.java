@@ -1,10 +1,10 @@
 package io.github.vampirestudios.cab.api;
 
+import io.github.vampirestudios.cab.Vector4i;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.Identifier;
 
@@ -31,23 +31,23 @@ public interface AstralBodyModifier {
     }
 
     @Environment(EnvType.CLIENT)
-    default Vector3f getSunTint() {
-        return new Vector3f(1.0F, 1.0F, 1.0F);
+    default Vector4i getSunTint() {
+        return new Vector4i(255, 255, 255, 255);
     }
 
     @Environment(EnvType.CLIENT)
-    default Vector3f getMoonTint() {
-        return new Vector3f(1.0F, 1.0F, 1.0F);
+    default Vector4i getMoonTint() {
+        return new Vector4i(255, 255, 255, 255);
     }
 
     @Environment(EnvType.CLIENT)
     default Identifier getSunTexture() {
-        return new Identifier("texture/environment/sun.png");
+        return new Identifier("textures/environment/sun.png");
     }
 
     @Environment(EnvType.CLIENT)
     default Identifier getMoonTexture() {
-        return new Identifier("texture/environment/moon_phases.png");
+        return new Identifier("textures/environment/moon_phases.png");
     }
 
     default boolean hasCustomSky() {
