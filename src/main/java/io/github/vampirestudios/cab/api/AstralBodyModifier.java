@@ -1,12 +1,12 @@
 package io.github.vampirestudios.cab.api;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.vampirestudios.cab.Vector4i;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.resources.ResourceLocation;
 
 public interface AstralBodyModifier {
 
@@ -41,13 +41,13 @@ public interface AstralBodyModifier {
     }
 
     @Environment(EnvType.CLIENT)
-    default Identifier getSunTexture() {
-        return new Identifier("textures/environment/sun.png");
+    default ResourceLocation getSunTexture() {
+        return new ResourceLocation("textures/environment/sun.png");
     }
 
     @Environment(EnvType.CLIENT)
-    default Identifier getMoonTexture() {
-        return new Identifier("textures/environment/moon_phases.png");
+    default ResourceLocation getMoonTexture() {
+        return new ResourceLocation("textures/environment/moon_phases.png");
     }
 
     default boolean hasCustomSky() {
@@ -58,7 +58,7 @@ public interface AstralBodyModifier {
         return false;
     }
 
-    default void render(MatrixStack matrixStack, float f, MinecraftClient client, ClientWorld world) {
+    default void render(PoseStack matrixStack, float f, Minecraft client, ClientLevel world) {
 
     }
 

@@ -1,11 +1,11 @@
 package io.github.vampirestudios.cab.api;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.ActionResult;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.InteractionResult;
 
 public interface AstralModifierCallback {
 
@@ -15,10 +15,10 @@ public interface AstralModifierCallback {
                 return event.renderCustom(matrixStack, f, client, world);
             }
 
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         };
     });
 
-    ActionResult renderCustom(MatrixStack matrixStack, float f, MinecraftClient client, ClientWorld world);
+    InteractionResult renderCustom(PoseStack matrixStack, float f, Minecraft client, ClientLevel world);
 
 }

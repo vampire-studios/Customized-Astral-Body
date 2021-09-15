@@ -2,10 +2,10 @@ package io.github.vampirestudios.cab.mixins;
 
 import io.github.vampirestudios.cab.Vector4i;
 import io.github.vampirestudios.cab.api.AstralBodyModifier;
-import net.minecraft.client.render.SkyProperties;
+import net.minecraft.client.renderer.DimensionSpecialEffects;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(SkyProperties.Overworld.class)
+@Mixin(DimensionSpecialEffects.OverworldEffects.class)
 public class OverworldSkyPropertiesMixin implements AstralBodyModifier {
 
 	@Override
