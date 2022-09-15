@@ -27,6 +27,7 @@
     "cab.mixins.json"
   ],
 
+  "accessWidener": "cab.accesswidener",
   "depends": {
     "fabricloader": ">=0.7.9",
     "fabric": "*"

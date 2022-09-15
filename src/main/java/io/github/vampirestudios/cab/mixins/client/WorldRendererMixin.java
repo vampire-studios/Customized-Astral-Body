@@ -7,6 +7,7 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import io.github.vampirestudios.cab.api.AstralBodyModifier;
 import io.github.vampirestudios.cab.rendering.AstralRendering;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
@@ -35,18 +36,18 @@ public abstract class WorldRendererMixin {
      * @author OliviaTheVampire
      */
     @Overwrite
-    public void renderSky(PoseStack matrices, Matrix4f matrix4f, float f, Runnable runnable) {
+    public void renderSky(PoseStack matrices, Matrix4f projectionMatrix, float partialTick, Camera camera, boolean bl, Runnable skyFogSetup) {
         if (((AstralBodyModifier) this.level.effects()).hasCustomSky()) {
             if (this.minecraft.level.effects().skyType() == DimensionSpecialEffects.SkyType.END || ((AstralBodyModifier) this.level.effects()).isEndSky()) {
                 this.renderEndSky(matrices);
             }
             if (this.minecraft.level.effects().skyType() == DimensionSpecialEffects.SkyType.NORMAL) {
                 if (((AstralBodyModifier) this.level.effects()).hasCustomAstralBody()) {
-                    AstralRendering.renderCustomAstralBody(matrices, minecraft, matrix4f, this.level.effects(), level, skyBuffer, darkBuffer,
-                            starBuffer, f);
+                    AstralRendering.renderCustomAstralBody(matrices, minecraft, projectionMatrix, this.level.effects(), level, skyBuffer, darkBuffer,
+                            starBuffer, partialTick, skyFogSetup);
                 } else {
                     RenderSystem.disableTexture();
-                    Vec3 vec3d = this.level.getSkyColor(this.minecraft.gameRenderer.getMainCamera().getPosition(), f);
+                    Vec3 vec3d = this.level.getSkyColor(this.minecraft.gameRenderer.getMainCamera().getPosition(), partialTick);
                     float g = (float)vec3d.x;
                     float h = (float)vec3d.y;
                     float i = (float)vec3d.z;
@@ -55,10 +56,10 @@ public abstract class WorldRendererMixin {
                     RenderSystem.depthMask(false);
                     RenderSystem.setShaderColor(g, h, i, 1.0F);
                     ShaderInstance shader = RenderSystem.getShader();
-                    this.skyBuffer.drawWithShader(matrices.last().pose(), matrix4f, shader);
+                    this.skyBuffer.drawWithShader(matrices.last().pose(), projectionMatrix, shader);
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
-                    float[] fs = this.level.effects().getSunriseColor(this.level.getTimeOfDay(f), f);
+                    float[] fs = this.level.effects().getSunriseColor(this.level.getTimeOfDay(partialTick), partialTick);
                     float s;
                     float t;
                     float p;
@@ -70,7 +71,7 @@ public abstract class WorldRendererMixin {
                         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                         matrices.pushPose();
                         matrices.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-                        s = Mth.sin(this.level.getSunAngle(f)) < 0.0F ? 180.0F : 0.0F;
+                        s = Mth.sin(this.level.getSunAngle(partialTick)) < 0.0F ? 180.0F : 0.0F;
                         matrices.mulPose(Vector3f.ZP.rotationDegrees(s));
                         matrices.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
                         float k = fs[0];
@@ -87,18 +88,17 @@ public abstract class WorldRendererMixin {
                             bufferBuilder.vertex(matrix4f2, q * 120.0F, r * 120.0F, -r * 40.0F * fs[3]).color(fs[0], fs[1], fs[2], 0.0F).endVertex();
                         }
 
-                        bufferBuilder.end();
-                        BufferUploader.end(bufferBuilder);
+                        BufferUploader.drawWithShader(bufferBuilder.end());
                         matrices.popPose();
                     }
 
                     RenderSystem.enableTexture();
                     RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
                     matrices.pushPose();
-                    s = 1.0F - this.level.getRainLevel(f);
+                    s = 1.0F - this.level.getRainLevel(partialTick);
                     RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, s);
                     matrices.mulPose(Vector3f.YP.rotationDegrees(-90.0F));
-                    matrices.mulPose(Vector3f.XP.rotationDegrees(this.level.getTimeOfDay(f) * 360.0F));
+                    matrices.mulPose(Vector3f.XP.rotationDegrees(this.level.getTimeOfDay(partialTick) * 360.0F));
                     Matrix4f matrix4f3 = matrices.last().pose();
                     t = 30.0F;
                     RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -108,8 +108,7 @@ public abstract class WorldRendererMixin {
                     bufferBuilder.vertex(matrix4f3, t, 100.0F, -t).uv(1.0F, 0.0F).endVertex();
                     bufferBuilder.vertex(matrix4f3, t, 100.0F, t).uv(1.0F, 1.0F).endVertex();
                     bufferBuilder.vertex(matrix4f3, -t, 100.0F, t).uv(0.0F, 1.0F).endVertex();
-                    bufferBuilder.end();
-                    BufferUploader.end(bufferBuilder);
+                    BufferUploader.drawWithShader(bufferBuilder.end());
                     t = 20.0F;
                     RenderSystem.setShaderTexture(0, MOON_LOCATION);
                     int u = this.level.getMoonPhase();
@@ -124,13 +123,12 @@ public abstract class WorldRendererMixin {
                     bufferBuilder.vertex(matrix4f3, t, -100.0F, t).uv(x, r).endVertex();
                     bufferBuilder.vertex(matrix4f3, t, -100.0F, -t).uv(x, p).endVertex();
                     bufferBuilder.vertex(matrix4f3, -t, -100.0F, -t).uv(q, p).endVertex();
-                    bufferBuilder.end();
-                    BufferUploader.end(bufferBuilder);
+                    BufferUploader.drawWithShader(bufferBuilder.end());
                     RenderSystem.disableTexture();
-                    float ab = this.level.getStarBrightness(f) * s;
+                    float ab = this.level.getStarBrightness(partialTick) * s;
                     if (ab > 0.0F) {
                         RenderSystem.setShaderColor(ab, ab, ab, ab);
-                        this.starBuffer.drawWithShader(matrices.last().pose(), matrix4f, GameRenderer.getPositionShader());
+                        this.starBuffer.drawWithShader(matrices.last().pose(), projectionMatrix, GameRenderer.getPositionShader());
                     }
 
                     RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -138,11 +136,11 @@ public abstract class WorldRendererMixin {
                     matrices.popPose();
                     RenderSystem.disableTexture();
                     RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0F);
-                    double d = this.minecraft.player.getEyePosition(f).y - this.level.getLevelData().getHorizonHeight(this.level);
+                    double d = this.minecraft.player.getEyePosition(partialTick).y - this.level.getLevelData().getHorizonHeight(this.level);
                     if (d < 0.0D) {
                         matrices.pushPose();
                         matrices.translate(0.0D, 12.0D, 0.0D);
-                        this.darkBuffer.drawWithShader(matrices.last().pose(), matrix4f, shader);
+                        this.darkBuffer.drawWithShader(matrices.last().pose(), projectionMatrix, shader);
                         matrices.popPose();
                     }
 
@@ -157,11 +155,11 @@ public abstract class WorldRendererMixin {
                 }
             }
             if (((AstralBodyModifier) this.level.effects()).hasFullyCustomSky()) {
-                ((AstralBodyModifier) this.level.effects()).render(matrices, f, minecraft, level);
+                ((AstralBodyModifier) this.level.effects()).render(matrices, partialTick, minecraft, level);
             }
         } else {
             RenderSystem.disableTexture();
-            Vec3 vec3d = this.level.getSkyColor(this.minecraft.gameRenderer.getMainCamera().getPosition(), f);
+            Vec3 vec3d = this.level.getSkyColor(this.minecraft.gameRenderer.getMainCamera().getPosition(), partialTick);
             float g = (float)vec3d.x;
             float h = (float)vec3d.y;
             float i = (float)vec3d.z;
@@ -170,10 +168,10 @@ public abstract class WorldRendererMixin {
             RenderSystem.depthMask(false);
             RenderSystem.setShaderColor(g, h, i, 1.0F);
             ShaderInstance shader = RenderSystem.getShader();
-            this.skyBuffer.drawWithShader(matrices.last().pose(), matrix4f, shader);
+            this.skyBuffer.drawWithShader(matrices.last().pose(), projectionMatrix, shader);
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            float[] fs = this.level.effects().getSunriseColor(this.level.getTimeOfDay(f), f);
+            float[] fs = this.level.effects().getSunriseColor(this.level.getTimeOfDay(partialTick), partialTick);
             float s;
             float t;
             float p;
@@ -185,7 +183,7 @@ public abstract class WorldRendererMixin {
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 matrices.pushPose();
                 matrices.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-                s = Mth.sin(this.level.getSunAngle(f)) < 0.0F ? 180.0F : 0.0F;
+                s = Mth.sin(this.level.getSunAngle(partialTick)) < 0.0F ? 180.0F : 0.0F;
                 matrices.mulPose(Vector3f.ZP.rotationDegrees(s));
                 matrices.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
                 float k = fs[0];
@@ -202,18 +200,17 @@ public abstract class WorldRendererMixin {
                     bufferBuilder.vertex(matrix4f2, q * 120.0F, r * 120.0F, -r * 40.0F * fs[3]).color(fs[0], fs[1], fs[2], 0.0F).endVertex();
                 }
 
-                bufferBuilder.end();
-                BufferUploader.end(bufferBuilder);
+                BufferUploader.drawWithShader(bufferBuilder.end());
                 matrices.popPose();
             }
 
             RenderSystem.enableTexture();
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             matrices.pushPose();
-            s = 1.0F - this.level.getRainLevel(f);
+            s = 1.0F - this.level.getRainLevel(partialTick);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, s);
             matrices.mulPose(Vector3f.YP.rotationDegrees(-90.0F));
-            matrices.mulPose(Vector3f.XP.rotationDegrees(this.level.getTimeOfDay(f) * 360.0F));
+            matrices.mulPose(Vector3f.XP.rotationDegrees(this.level.getTimeOfDay(partialTick) * 360.0F));
             Matrix4f matrix4f3 = matrices.last().pose();
             t = 30.0F;
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -223,8 +220,7 @@ public abstract class WorldRendererMixin {
             bufferBuilder.vertex(matrix4f3, t, 100.0F, -t).uv(1.0F, 0.0F).endVertex();
             bufferBuilder.vertex(matrix4f3, t, 100.0F, t).uv(1.0F, 1.0F).endVertex();
             bufferBuilder.vertex(matrix4f3, -t, 100.0F, t).uv(0.0F, 1.0F).endVertex();
-            bufferBuilder.end();
-            BufferUploader.end(bufferBuilder);
+            BufferUploader.drawWithShader(bufferBuilder.end());
             t = 20.0F;
             RenderSystem.setShaderTexture(0, MOON_LOCATION);
             int u = this.level.getMoonPhase();
@@ -239,13 +235,16 @@ public abstract class WorldRendererMixin {
             bufferBuilder.vertex(matrix4f3, t, -100.0F, t).uv(x, r).endVertex();
             bufferBuilder.vertex(matrix4f3, t, -100.0F, -t).uv(x, p).endVertex();
             bufferBuilder.vertex(matrix4f3, -t, -100.0F, -t).uv(q, p).endVertex();
-            bufferBuilder.end();
-            BufferUploader.end(bufferBuilder);
+            BufferUploader.drawWithShader(bufferBuilder.end());
             RenderSystem.disableTexture();
-            float ab = this.level.getStarBrightness(f) * s;
+            float ab = this.level.getStarBrightness(partialTick) * s;
             if (ab > 0.0F) {
-                RenderSystem.setShaderColor(ab, ab, ab, ab);
-                this.starBuffer.drawWithShader(matrices.last().pose(), matrix4f, GameRenderer.getPositionShader());
+                RenderSystem.setShaderColor(u, u, u, u);
+                FogRenderer.setupNoFog();
+                this.starBuffer.bind();
+                this.starBuffer.drawWithShader(matrices.last().pose(), projectionMatrix, GameRenderer.getPositionShader());
+                VertexBuffer.unbind();
+                skyFogSetup.run();
             }
 
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -253,11 +252,11 @@ public abstract class WorldRendererMixin {
             matrices.popPose();
             RenderSystem.disableTexture();
             RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0F);
-            double d = this.minecraft.player.getEyePosition(f).y - this.level.getLevelData().getHorizonHeight(this.level);
+            double d = this.minecraft.player.getEyePosition(partialTick).y - this.level.getLevelData().getHorizonHeight(this.level);
             if (d < 0.0D) {
                 matrices.pushPose();
                 matrices.translate(0.0D, 12.0D, 0.0D);
-                this.darkBuffer.drawWithShader(matrices.last().pose(), matrix4f, shader);
+                this.darkBuffer.drawWithShader(matrices.last().pose(), projectionMatrix, shader);
                 matrices.popPose();
             }
 

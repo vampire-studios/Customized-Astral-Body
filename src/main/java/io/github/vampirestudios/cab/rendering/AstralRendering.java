@@ -18,8 +18,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class AstralRendering {
 
-    public static void renderCustomAstralBody(PoseStack matrices, Minecraft client, Matrix4f matrix4f, DimensionSpecialEffects dimension, ClientLevel world, VertexBuffer lightSkyBuffer,
-                                              VertexBuffer darkSkyBuffer, VertexBuffer starsBuffer, float f) {
+    public static void renderCustomAstralBody(PoseStack matrices, Minecraft client, Matrix4f projectionMatrix, DimensionSpecialEffects dimension, ClientLevel world, VertexBuffer lightSkyBuffer,
+                                              VertexBuffer darkSkyBuffer, VertexBuffer starsBuffer, float f, Runnable skyFogSetup) {
         RenderSystem.disableTexture();
         Vec3 vec3d = world.getSkyColor(client.gameRenderer.getMainCamera().getPosition(), f);
         float g = (float)vec3d.x;
@@ -30,7 +30,7 @@ public class AstralRendering {
         RenderSystem.depthMask(false);
         RenderSystem.setShaderColor(g, h, i, 1.0F);
         ShaderInstance shader = RenderSystem.getShader();
-        lightSkyBuffer.drawWithShader(matrices.last().pose(), matrix4f, shader);
+        lightSkyBuffer.drawWithShader(matrices.last().pose(), projectionMatrix, shader);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         float[] fs = world.effects().getSunriseColor(world.getTimeOfDay(f), f);
@@ -61,9 +61,7 @@ public class AstralRendering {
                 r = Mth.cos(p);
                 bufferBuilder.vertex(matrix4f2, q * 120.0F, r * 120.0F, -r * 40.0F * fs[3]).color(fs[0], fs[1], fs[2], 0.0F).endVertex();
             }
-
-            bufferBuilder.end();
-            BufferUploader.end(bufferBuilder);
+            BufferUploader.drawWithShader(bufferBuilder.end());
             matrices.popPose();
         }
 
@@ -84,8 +82,7 @@ public class AstralRendering {
         bufferBuilder.vertex(matrix4f3, t, 100.0F, -t).color(sunTint.x(), sunTint.y(), sunTint.z(), sunTint.w()).uv(1.0F, 0.0F).endVertex();
         bufferBuilder.vertex(matrix4f3, t, 100.0F, t).color(sunTint.x(), sunTint.y(), sunTint.z(), sunTint.w()).uv(1.0F, 1.0F).endVertex();
         bufferBuilder.vertex(matrix4f3, -t, 100.0F, t).color(sunTint.x(), sunTint.y(), sunTint.z(), sunTint.w()).uv(0.0F, 1.0F).endVertex();
-        bufferBuilder.end();
-        BufferUploader.end(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder.end());
         t = ((AstralBodyModifier)dimension).getMoonSize();
         Vector4i moonTint = ((AstralBodyModifier)dimension).getSunTint();
         RenderSystem.setShaderTexture(0, ((AstralBodyModifier)dimension).getMoonTexture());
@@ -101,13 +98,16 @@ public class AstralRendering {
         bufferBuilder.vertex(matrix4f3, t, -100.0F, t).color(moonTint.x(), moonTint.y(), moonTint.z(), moonTint.w()).uv(x, r).endVertex();
         bufferBuilder.vertex(matrix4f3, t, -100.0F, -t).color(moonTint.x(), moonTint.y(), moonTint.z(), moonTint.w()).uv(x, p).endVertex();
         bufferBuilder.vertex(matrix4f3, -t, -100.0F, -t).color(moonTint.x(), moonTint.y(), moonTint.z(), moonTint.w()).uv(q, p).endVertex();
-        bufferBuilder.end();
-        BufferUploader.end(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder.end());
         RenderSystem.disableTexture();
         float ab = world.getStarBrightness(f) * s;
         if (ab > 0.0F) {
-            RenderSystem.setShaderColor(ab, ab, ab, ab);
-            starsBuffer.drawWithShader(matrices.last().pose(), matrix4f, GameRenderer.getPositionShader());
+            RenderSystem.setShaderColor(u, u, u, u);
+            FogRenderer.setupNoFog();
+            starsBuffer.bind();
+            starsBuffer.drawWithShader(matrices.last().pose(), projectionMatrix, GameRenderer.getPositionShader());
+            VertexBuffer.unbind();
+            skyFogSetup.run();
         }
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -119,7 +119,7 @@ public class AstralRendering {
         if (d < 0.0D) {
             matrices.pushPose();
             matrices.translate(0.0D, 12.0D, 0.0D);
-            darkSkyBuffer.drawWithShader(matrices.last().pose(), matrix4f, shader);
+            darkSkyBuffer.drawWithShader(matrices.last().pose(), projectionMatrix, shader);
             matrices.popPose();
         }
 
